@@ -19,6 +19,7 @@ const BacklinkButton = () => (
 
 const activate = (): void => {
     console.log('[growi-plugin-backlink]: activate');
+    console.log('pageListButton:', document.querySelector('[data-testid="pageListButton"]'));
 
     const observer = new MutationObserver(() => {
         const pageListBtn = document.querySelector('[data-testid="pageListButton"]');
