@@ -1,4 +1,4 @@
-declare const growiFacade: any;
+import { createRoot } from 'react-dom/client';
 
 const MOUNT_ID = 'growi-plugin-backlink-mount';
 
@@ -18,12 +18,12 @@ const BacklinkButton = () => (
 );
 
 const activate = (): void => {
-    if (growiFacade?.reactFactory == null) return;
+    console.log('[growi-plugin-backlink]: activate');
 
     const observer = new MutationObserver(() => {
         const pageListBtn = document.querySelector('[data-testid="pageListButton"]');
         if (pageListBtn == null) return;
-        if (document.getElementById(MOUNT_ID) != null) return; // 重複防止
+        if (document.getElementById(MOUNT_ID) != null) return;
 
         observer.disconnect();
 
@@ -31,18 +31,14 @@ const activate = (): void => {
         mountPoint.id = MOUNT_ID;
         pageListBtn.parentElement?.appendChild(mountPoint);
 
-        growiFacade.reactFactory.renderToDOM(<BacklinkButton />, mountPoint);
+        createRoot(mountPoint).render(<BacklinkButton />);
     });
 
     observer.observe(document.body, { childList: true, subtree: true });
 };
 
 const deactivate = (): void => {
-    const mountPoint = document.getElementById(MOUNT_ID);
-    if (mountPoint != null) {
-        growiFacade?.reactFactory?.unmountFromDOM?.(mountPoint);
-        mountPoint.remove();
-    }
+    document.getElementById(MOUNT_ID)?.remove();
 };
 
 if ((window as any).pluginActivators == null) {
