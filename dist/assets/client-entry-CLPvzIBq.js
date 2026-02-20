@@ -1,0 +1,1 @@
+const i=()=>{growiFacade==null||growiFacade.markdownRenderer==null||console.log("[growi-plugin-backlink]: activate")},n=()=>{};window.pluginActivators==null&&(window.pluginActivators={});window.pluginActivators["growi-plugin-backlink"]={activate:i,deactivate:n};

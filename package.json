@@ -1,0 +1,25 @@
+{
+    "name": "growi-plugin-backlink",
+    "version": "1.0.0",
+    "description": "GROWI plugin to display backlinks (pages linking to the current page) in the sidebar",
+    "license": "MIT",
+    "keywords": [
+        "growi",
+        "growi-plugin"
+    ],
+    "growiPlugin": {
+        "schemaVersion": "4",
+        "types": [
+            "script"
+        ]
+    },
+    "type": "module",
+    "scripts": {
+        "build": "tsc && vite build"
+    },
+    "devDependencies": {
+        "typescript": "^5.9.3",
+        "vite": "^7.3.1",
+        "@vitejs/plugin-react": "^5.1.4"
+    }
+}
