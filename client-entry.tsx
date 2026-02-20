@@ -18,24 +18,15 @@ const BacklinkButton = () => (
 );
 
 const activate = (): void => {
-    console.log('[growi-plugin-backlink]: activate');
-    console.log('pageListButton:', document.querySelector('[data-testid="pageListButton"]'));
+    const pageListBtn = document.querySelector('[data-testid="pageListButton"]');
+    if (pageListBtn == null) return;
+    if (document.getElementById(MOUNT_ID) != null) return;
 
-    const observer = new MutationObserver(() => {
-        const pageListBtn = document.querySelector('[data-testid="pageListButton"]');
-        if (pageListBtn == null) return;
-        if (document.getElementById(MOUNT_ID) != null) return;
+    const mountPoint = document.createElement('div');
+    mountPoint.id = MOUNT_ID;
+    pageListBtn.parentElement?.appendChild(mountPoint);
 
-        observer.disconnect();
-
-        const mountPoint = document.createElement('div');
-        mountPoint.id = MOUNT_ID;
-        pageListBtn.parentElement?.appendChild(mountPoint);
-
-        createRoot(mountPoint).render(<BacklinkButton />);
-    });
-
-    observer.observe(document.body, { childList: true, subtree: true });
+    createRoot(mountPoint).render(<BacklinkButton />);
 };
 
 const deactivate = (): void => {
