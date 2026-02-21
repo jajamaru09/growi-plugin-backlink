@@ -26,7 +26,12 @@ const BacklinkModal = ({ pages, loading, error, onClose }: Props) => {
                 <div className="modal-dialog modal-lg">
                     <div className="modal-content">
                         <div className="modal-header">
-                            <h5 className="modal-title">バックリンク</h5>
+                            <h5 className="modal-title">
+                                <span className="material-symbols-outlined me-2" style={{ verticalAlign: 'middle', fontSize: '1.25rem' }}
+                                >
+                                    link
+                                </span>
+                                バックリンク</h5>
                             <button type="button" className="btn-close" onClick={onClose} />
                         </div>
                         <div className="modal-body">
@@ -36,13 +41,26 @@ const BacklinkModal = ({ pages, loading, error, onClose }: Props) => {
                                 <p className="text-muted">バックリンクが見つかりませんでした</p>
                             )}
                             {!loading && !error && pages.length > 0 && (
-                                <ul className="list-group list-group-flush">
-                                    {pages.map(page => (
-                                        <li key={page._id} className="list-group-item px-0">
-                                            <a href={page.path}>{page.path}</a>
-                                        </li>
-                                    ))}
-                                </ul>
+
+                                <>
+                                    <p className="text-muted small mb-3">
+                                        <strong>{pages.length}</strong> 件のページがこのページを参照しています
+                                    </p>
+                                    <ul className="list-group list-group-flush">
+                                        {pages.map(page => (
+                                            <li key={page._id} className="list-group-item px-0">
+                                                <a href={page.path}> <span
+                                                    className="material-symbols-outlined me-2 text-muted flex-shrink-0"
+                                                    style={{ fontSize: '1rem' }}
+                                                >
+                                                    article
+                                                </span>
+                                                    {page.path}
+                                                </a>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </>
                             )}
                         </div>
                     </div>
