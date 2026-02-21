@@ -9,13 +9,14 @@ async function searchByKeyword(keyword: string, signal: AbortSignal): Promise<Ba
     const res = await fetch(url, { credentials: 'same-origin', signal });
     const json = await res.json();
     if (!json.ok) return [];
-    return json.data as BacklinkPage[];
+    return (json.data as Array<{ data: BacklinkPage }>).map(item => item.data);
 }
 
 async function fetchPagePath(pageId: string, signal: AbortSignal): Promise<string | null> {
     const res = await fetch(`/_api/v3/page?pageId=${pageId}`, { credentials: 'same-origin', signal });
     const json = await res.json();
-    return json.path ?? null;
+    console.log('[backlink] page API response:', JSON.stringify(json).slice(0, 200));
+    return json.path ?? json.data?.path ?? json.page?.path ?? null;
 }
 
 function mergeUnique(a: BacklinkPage[], b: BacklinkPage[]): BacklinkPage[] {
