@@ -49,14 +49,8 @@ const BacklinkModal = ({ pages, loading, error, onClose }: Props) => {
                                     <ul className="list-group list-group-flush">
                                         {pages.map(page => (
                                             <li key={page._id} className="list-group-item px-0">
-                                                <a href={page.path}> <span
-                                                    className="material-symbols-outlined me-2 text-muted flex-shrink-0"
-                                                    style={{ fontSize: '1rem' }}
-                                                >
-                                                    article
-                                                </span>
-                                                    {page.path}
-                                                </a>
+                                                <span className="material-symbols-outlined fs-5 me-1" aria-hidden="true">description</span>
+                                                <a href={page.path}>{page.path}</a>
                                             </li>
                                         ))}
                                     </ul>
