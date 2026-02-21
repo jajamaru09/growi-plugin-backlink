@@ -4,7 +4,6 @@ import type { BacklinkPage } from './types';
 async function searchByKeyword(keyword: string, signal: AbortSignal): Promise<BacklinkPage[]> {
     const url = `/_api/search?q=${encodeURIComponent(`"${keyword}"`)}&limit=50`;
     const res = await fetch(url, { credentials: 'same-origin', signal });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await res.json();
     if (!json.ok) return [];
     return (json.data as Array<{ data: BacklinkPage }>).map(item => item.data);
@@ -18,7 +17,6 @@ async function fetchPage(
         ? `pageId=${encodeURIComponent(params.pageId)}`
         : `path=${encodeURIComponent(params.path)}`;
     const res = await fetch(`/_api/v3/page?${query}`, { credentials: 'same-origin', signal });
-    if (!res.ok) return null;
     const json = await res.json();
     const page = json.page;
     if (page?._id == null || page?.path == null) return null;
@@ -36,34 +34,40 @@ export function useBacklinks(pageId: string) {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        // ルートページ（/）はURLにpageIdが含まれないためスキップ
-        if (!pageId) {
-            setPages([]);
-            setLoading(false);
-            return;
-        }
-
         const controller = new AbortController();
 
         async function fetchAll() {
             try {
-                // URLパス検索とpage._id取得を並列実行
-                // URLはパス形式（例: "sandbox/test"）を前提とし、pathクエリでページ情報を取得する
-                const [byPath, pageInfo] = await Promise.all([
-                    searchByKeyword(pageId, controller.signal),
-                    fetchPage({ path: '/' + pageId }, controller.signal),
-                ]);
+                // ルートページ（/）はURLにpageIdが含まれないため、パスでページ情報を取得してIDを解決する
+                let effectivePageId = pageId;
+                let resolvedPath: string | null = null;
 
-                // page._idでも検索してマージ（IDリンク形式のバックリンクを補足）
-                let results = byPath;
-                if (pageInfo != null) {
-                    const byId = await searchByKeyword(pageInfo._id, controller.signal);
-                    results = mergeUnique(byPath, byId);
+                if (pageId === '') {
+                    const rootPage = await fetchPage({ path: '/' }, controller.signal);
+                    if (rootPage == null) {
+                        setPages([]);
+                        return;
+                    }
+                    effectivePageId = rootPage._id;
+                    resolvedPath = rootPage.path;
                 }
 
-                // 自ページを除外
-                const selfId = pageInfo?._id;
-                setPages(selfId != null ? results.filter(p => p._id !== selfId) : results);
+                // ID検索とpath取得を並列実行（ルートページはpath取得済みのためresolveのみ）
+                const [byId, pagePath] = await Promise.all([
+                    searchByKeyword(effectivePageId, controller.signal),
+                    resolvedPath != null
+                        ? Promise.resolve(resolvedPath)
+                        : fetchPage({ pageId: effectivePageId }, controller.signal).then(p => p?.path ?? null),
+                ]);
+
+                let results = byId;
+                if (pagePath != null) {
+                    const byPath = await searchByKeyword(pagePath, controller.signal);
+                    results = mergeUnique(byId, byPath);
+                }
+
+                const filtered = results.filter(p => p._id !== effectivePageId);
+                setPages(filtered);
             } catch (e) {
                 if (!(e instanceof DOMException && e.name === 'AbortError')) {
                     setError('バックリンクの取得に失敗しました');
