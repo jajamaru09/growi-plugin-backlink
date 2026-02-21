@@ -34,17 +34,22 @@ export function useBacklinks(pageId: string) {
         async function fetchAll() {
             try {
                 const byId = await searchByKeyword(pageId, controller.signal);
+                console.log('[backlink] byId:', byId);
 
                 let results = byId;
                 if (ENABLE_PATH_SEARCH) {
                     const path = await fetchPagePath(pageId, controller.signal);
+                    console.log('[backlink] pagePath:', path);
                     if (path != null) {
                         const byPath = await searchByKeyword(path, controller.signal);
+                        console.log('[backlink] byPath:', byPath);
                         results = mergeUnique(byId, byPath);
                     }
                 }
 
-                setPages(results.filter(p => p._id !== pageId));
+                const filtered = results.filter(p => p._id !== pageId);
+                console.log('[backlink] final pages:', filtered);
+                setPages(filtered);
             } catch (e) {
                 if (!(e instanceof DOMException && e.name === 'AbortError')) {
                     setError('バックリンクの取得に失敗しました');
