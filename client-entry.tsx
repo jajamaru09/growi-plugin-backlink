@@ -16,7 +16,8 @@ const activate = (): void => {
     mountPoint.id = MOUNT_ID;
     pageListBtn.parentElement?.appendChild(mountPoint);
 
-    createRoot(mountPoint).render(<BacklinkButton cssModuleClass={cssModuleClass} />);
+    const pageId = window.location.pathname.slice(1);
+    createRoot(mountPoint).render(<BacklinkButton cssModuleClass={cssModuleClass} pageId={pageId} />);
 };
 
 const deactivate = (): void => {

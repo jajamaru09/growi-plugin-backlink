@@ -1,11 +1,15 @@
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { useBacklinks } from './useBacklinks';
 
 type Props = {
+    pageId: string;
     onClose: () => void;
 };
 
-const BacklinkModal = ({ onClose }: Props) => {
+const BacklinkModal = ({ pageId, onClose }: Props) => {
+    const { pages, loading, error } = useBacklinks(pageId);
+
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Escape') onClose();
@@ -18,14 +22,27 @@ const BacklinkModal = ({ onClose }: Props) => {
         <>
             <div className="modal-backdrop fade show" onClick={onClose} />
             <div className="modal d-block" tabIndex={-1}>
-                <div className="modal-dialog">
+                <div className="modal-dialog modal-lg">
                     <div className="modal-content">
                         <div className="modal-header">
                             <h5 className="modal-title">バックリンク</h5>
                             <button type="button" className="btn-close" onClick={onClose} />
                         </div>
                         <div className="modal-body">
-                            <p>（バックリンクの一覧）</p>
+                            {loading && <p className="text-center text-muted">読み込み中...</p>}
+                            {error && <p className="text-danger">{error}</p>}
+                            {!loading && !error && pages.length === 0 && (
+                                <p className="text-muted">バックリンクが見つかりませんでした</p>
+                            )}
+                            {!loading && !error && pages.length > 0 && (
+                                <ul className="list-group list-group-flush">
+                                    {pages.map(page => (
+                                        <li key={page._id} className="list-group-item px-0">
+                                            <a href={page.path}>{page.path}</a>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
                         </div>
                     </div>
                 </div>

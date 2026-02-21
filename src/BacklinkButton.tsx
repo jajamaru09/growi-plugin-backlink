@@ -3,9 +3,10 @@ import BacklinkModal from './BacklinkModal';
 
 type Props = {
     cssModuleClass: string;
+    pageId: string;
 };
 
-const BacklinkButton = ({ cssModuleClass }: Props) => {
+const BacklinkButton = ({ cssModuleClass, pageId }: Props) => {
     const [isOpen, setIsOpen] = useState(false);
     const handleClose = useCallback(() => setIsOpen(false), []);
 
@@ -23,7 +24,7 @@ const BacklinkButton = ({ cssModuleClass }: Props) => {
                     <span className="grw-labels d-none d-lg-flex">バックリンク</span>
                 </button>
             </div>
-            {isOpen && <BacklinkModal onClose={handleClose} />}
+            {isOpen && <BacklinkModal pageId={pageId} onClose={handleClose} />}
         </>
     );
 };
