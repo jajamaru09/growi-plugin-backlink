@@ -8,6 +8,21 @@ let root: Root | null = null;
 let observer: MutationObserver | null = null;
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
+/**
+ * 現在の URL がユーザーページかどうかを返す。
+ * 管理画面（/admin）・検索（/_search）など GROWI 内部ルートでは false を返す。
+ */
+function isPageUrl(): boolean {
+    try {
+        const pathname = decodeURIComponent(window.location.pathname.slice(1));
+        if (pathname.startsWith('_')) return false;         // /_search, /_api など
+        if (pathname === 'admin' || pathname.startsWith('admin/')) return false;
+        return true;
+    } catch {
+        return true;
+    }
+}
+
 /** pageListButton を含むフレックスコンテナを返す。page-comment-button をフォールバックに使う */
 function getContainer(): Element | null {
     const anchor =
@@ -54,6 +69,13 @@ function scheduleCheck(): void {
     if (debounceTimer != null) clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
         debounceTimer = null;
+        if (!isPageUrl()) {
+            // 管理画面・検索など非ページURLではボタンを削除
+            root?.unmount();
+            root = null;
+            document.getElementById(MOUNT_ID)?.remove();
+            return;
+        }
         const container = getContainer();
         if (container == null) return; // サイドバーがまだ描画されていない
         if (document.getElementById(MOUNT_ID) == null) {
