@@ -12,10 +12,18 @@ async function searchByKeyword(keyword: string, signal: AbortSignal): Promise<Ba
     return (json.data as Array<{ data: BacklinkPage }>).map(item => item.data);
 }
 
-async function fetchPagePath(pageId: string, signal: AbortSignal): Promise<string | null> {
-    const res = await fetch(`/_api/v3/page?pageId=${pageId}`, { credentials: 'same-origin', signal });
+async function fetchPage(
+    params: { pageId: string } | { path: string },
+    signal: AbortSignal,
+): Promise<{ _id: string; path: string } | null> {
+    const query = 'pageId' in params
+        ? `pageId=${encodeURIComponent(params.pageId)}`
+        : `path=${encodeURIComponent(params.path)}`;
+    const res = await fetch(`/_api/v3/page?${query}`, { credentials: 'same-origin', signal });
     const json = await res.json();
-    return json.page?.path ?? null;
+    const page = json.page;
+    if (page?._id == null || page?.path == null) return null;
+    return { _id: page._id, path: page.path };
 }
 
 function mergeUnique(a: BacklinkPage[], b: BacklinkPage[]): BacklinkPage[] {
@@ -33,18 +41,32 @@ export function useBacklinks(pageId: string) {
 
         async function fetchAll() {
             try {
-                const byId = await searchByKeyword(pageId, controller.signal);
+                // ルートページ（/）はURLにpageIdが含まれないため、パスでページ情報を取得してIDを解決する
+                let effectivePageId = pageId;
+                let resolvedPath: string | null = null;
+
+                if (pageId === '') {
+                    const rootPage = await fetchPage({ path: '/' }, controller.signal);
+                    if (rootPage == null) {
+                        setPages([]);
+                        return;
+                    }
+                    effectivePageId = rootPage._id;
+                    resolvedPath = rootPage.path;
+                }
+
+                const byId = await searchByKeyword(effectivePageId, controller.signal);
 
                 let results = byId;
                 if (ENABLE_PATH_SEARCH) {
-                    const path = await fetchPagePath(pageId, controller.signal);
+                    const path = resolvedPath ?? (await fetchPage({ pageId: effectivePageId }, controller.signal))?.path ?? null;
                     if (path != null) {
                         const byPath = await searchByKeyword(path, controller.signal);
                         results = mergeUnique(byId, byPath);
                     }
                 }
 
-                const filtered = results.filter(p => p._id !== pageId);
+                const filtered = results.filter(p => p._id !== effectivePageId);
                 setPages(filtered);
             } catch (e) {
                 if (!(e instanceof DOMException && e.name === 'AbortError')) {
