@@ -15,8 +15,7 @@ async function searchByKeyword(keyword: string, signal: AbortSignal): Promise<Ba
 async function fetchPagePath(pageId: string, signal: AbortSignal): Promise<string | null> {
     const res = await fetch(`/_api/v3/page?pageId=${pageId}`, { credentials: 'same-origin', signal });
     const json = await res.json();
-    console.log('[backlink] page API response:', JSON.stringify(json).slice(0, 200));
-    return json.path ?? json.data?.path ?? json.page?.path ?? null;
+    return json.page?.path ?? null;
 }
 
 function mergeUnique(a: BacklinkPage[], b: BacklinkPage[]): BacklinkPage[] {
@@ -35,21 +34,17 @@ export function useBacklinks(pageId: string) {
         async function fetchAll() {
             try {
                 const byId = await searchByKeyword(pageId, controller.signal);
-                console.log('[backlink] byId:', byId);
 
                 let results = byId;
                 if (ENABLE_PATH_SEARCH) {
                     const path = await fetchPagePath(pageId, controller.signal);
-                    console.log('[backlink] pagePath:', path);
                     if (path != null) {
                         const byPath = await searchByKeyword(path, controller.signal);
-                        console.log('[backlink] byPath:', byPath);
                         results = mergeUnique(byId, byPath);
                     }
                 }
 
                 const filtered = results.filter(p => p._id !== pageId);
-                console.log('[backlink] final pages:', filtered);
                 setPages(filtered);
             } catch (e) {
                 if (!(e instanceof DOMException && e.name === 'AbortError')) {
