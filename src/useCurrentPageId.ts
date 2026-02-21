@@ -1,10 +1,20 @@
 import { useEffect, useState } from 'react';
 
+// SPA遷移時に pushState へ渡されたURLがパーセントエンコード済みの場合があるため
+// pathname を decode して正規化する（二重エンコード防止）
+function getPageId(): string {
+    try {
+        return decodeURIComponent(window.location.pathname.slice(1));
+    } catch {
+        return window.location.pathname.slice(1);
+    }
+}
+
 export function useCurrentPageId(): string {
-    const [pageId, setPageId] = useState(() => window.location.pathname.slice(1));
+    const [pageId, setPageId] = useState(getPageId);
 
     useEffect(() => {
-        const update = () => setPageId(window.location.pathname.slice(1));
+        const update = () => setPageId(getPageId());
 
         window.addEventListener('popstate', update);
 
