@@ -2,11 +2,11 @@ import { createRoot } from 'react-dom/client';
 
 const MOUNT_ID = 'growi-plugin-backlink-mount';
 
-const BacklinkButton = () => (
+const BacklinkButton = ({ cssModuleClass }: { cssModuleClass: string }) => (
     <div className="d-flex">
         <button
             type="button"
-            className="btn btn-outline-neutral-secondary rounded-pill py-1 px-lg-3"
+            className={`btn btn-outline-neutral-secondary ${cssModuleClass} rounded-pill py-1 px-lg-3`}
             onClick={() => console.log('[growi-plugin-backlink]: clicked')}
         >
             <span className="grw-icon d-flex me-lg-2">
@@ -22,11 +22,15 @@ const activate = (): void => {
     if (pageListBtn == null) return;
     if (document.getElementById(MOUNT_ID) != null) return;
 
+    const existingBtn = pageListBtn.querySelector('button');
+    const cssModuleClass = Array.from(existingBtn?.classList ?? [])
+        .find(cls => cls.startsWith('PageAccessoriesControl_btn-page-accessories__')) ?? '';
+
     const mountPoint = document.createElement('div');
     mountPoint.id = MOUNT_ID;
     pageListBtn.parentElement?.appendChild(mountPoint);
 
-    createRoot(mountPoint).render(<BacklinkButton />);
+    createRoot(mountPoint).render(<BacklinkButton cssModuleClass={cssModuleClass} />);
 };
 
 const deactivate = (): void => {
