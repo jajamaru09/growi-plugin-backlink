@@ -1,15 +1,14 @@
 import { useState } from 'react';
 import BacklinkModal from './BacklinkModal';
 import { useBacklinks } from './useBacklinks';
-import { useCurrentPageId } from './useCurrentPageId';
 
 type Props = {
     cssModuleClass: string;
 };
 
 const BacklinkButton = ({ cssModuleClass }: Props) => {
-    const currentPageId = useCurrentPageId();
-    const { pages, loading, error } = useBacklinks(currentPageId);
+    const [pageId] = useState(() => window.location.pathname.slice(1));
+    const { pages, loading, error } = useBacklinks(pageId);
     const [isOpen, setIsOpen] = useState(false);
 
     return (
