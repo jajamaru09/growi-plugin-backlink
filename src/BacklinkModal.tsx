@@ -21,9 +21,9 @@ const BacklinkModal = ({ pages, loading, error, onClose }: Props) => {
 
     return createPortal(
         <>
-            <div className="modal-backdrop fade show" onClick={onClose} />
-            <div className="modal d-block" tabIndex={-1}>
-                <div className="modal-dialog modal-lg">
+            <div className="modal-backdrop fade show" />
+            <div className="modal d-block" tabIndex={-1} onClick={onClose}>
+                <div className="modal-dialog modal-lg" onClick={e => e.stopPropagation()}>
                     <div className="modal-content">
                         <div className="modal-header">
                             <h5 className="modal-title">
