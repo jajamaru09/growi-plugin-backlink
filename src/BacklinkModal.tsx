@@ -10,7 +10,6 @@ type Props = {
 };
 
 const BacklinkModal = ({ pages, loading, error, onClose }: Props) => {
-
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Escape') onClose();
@@ -37,24 +36,22 @@ const BacklinkModal = ({ pages, loading, error, onClose }: Props) => {
                         <div className="modal-body">
                             {loading && <p className="text-center text-muted">読み込み中...</p>}
                             {error && <p className="text-danger">{error}</p>}
-                            {!loading && !error && pages.length === 0 && (
-                                <p className="text-muted">バックリンクが見つかりませんでした</p>
-                            )}
-                            {!loading && !error && pages.length > 0 && (
-
-                                <>
-                                    <p className="text-muted small mb-3">
-                                        <strong>{pages.length}</strong> 件のページがこのページを参照しています
-                                    </p>
-                                    <ul className="list-group list-group-flush">
-                                        {pages.map(page => (
-                                            <li key={page._id} className="list-group-item px-0">
-                                                <span className="material-symbols-outlined fs-5 me-1" aria-hidden="true">description</span>
-                                                <a href={page.path}>{page.path}</a>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </>
+                            {!loading && !error && (
+                                pages.length === 0
+                                    ? <p className="text-muted">バックリンクが見つかりませんでした</p>
+                                    : <>
+                                        <p className="text-muted small mb-3">
+                                            <strong>{pages.length}</strong> 件のページがこのページを参照しています
+                                        </p>
+                                        <ul className="list-group list-group-flush">
+                                            {pages.map(page => (
+                                                <li key={page._id} className="list-group-item px-0">
+                                                    <span className="material-symbols-outlined fs-5 me-1" aria-hidden="true">description</span>
+                                                    <a href={page.path}>{page.path}</a>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </>
                             )}
                         </div>
                     </div>

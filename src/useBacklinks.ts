@@ -1,9 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { BacklinkPage } from './types';
 
-// パス形式での検索を有効にするか（将来的に無効化する可能性がある場合は false に）
-const ENABLE_PATH_SEARCH = true;
-
 async function searchByKeyword(keyword: string, signal: AbortSignal): Promise<BacklinkPage[]> {
     const url = `/_api/search?q=${encodeURIComponent(`"${keyword}"`)}&limit=50`;
     const res = await fetch(url, { credentials: 'same-origin', signal });
@@ -55,15 +52,18 @@ export function useBacklinks(pageId: string) {
                     resolvedPath = rootPage.path;
                 }
 
-                const byId = await searchByKeyword(effectivePageId, controller.signal);
+                // ID検索とpath取得を並列実行（ルートページはpath取得済みのためresolveのみ）
+                const [byId, pagePath] = await Promise.all([
+                    searchByKeyword(effectivePageId, controller.signal),
+                    resolvedPath != null
+                        ? Promise.resolve(resolvedPath)
+                        : fetchPage({ pageId: effectivePageId }, controller.signal).then(p => p?.path ?? null),
+                ]);
 
                 let results = byId;
-                if (ENABLE_PATH_SEARCH) {
-                    const path = resolvedPath ?? (await fetchPage({ pageId: effectivePageId }, controller.signal))?.path ?? null;
-                    if (path != null) {
-                        const byPath = await searchByKeyword(path, controller.signal);
-                        results = mergeUnique(byId, byPath);
-                    }
+                if (pagePath != null) {
+                    const byPath = await searchByKeyword(pagePath, controller.signal);
+                    results = mergeUnique(byId, byPath);
                 }
 
                 const filtered = results.filter(p => p._id !== effectivePageId);
