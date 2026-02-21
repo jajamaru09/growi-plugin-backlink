@@ -25,7 +25,7 @@ const BacklinkButton = ({ cssModuleClass }: Props) => {
                     </span>
                     <span className="grw-labels d-none d-lg-flex">バックリンク</span>
                     {!loading && (
-                        <span className="badge rounded-pill bg-neutral-secondary ms-1">{pages.length}</span>
+                        <span className="grw-count-badge px-2 badge bg-body-tertiary text-body-tertiary">{pages.length}</span>
                     )}
                 </button>
             </div>
