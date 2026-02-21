@@ -1,21 +1,7 @@
 import { createRoot } from 'react-dom/client';
+import BacklinkButton from './src/BacklinkButton';
 
 const MOUNT_ID = 'growi-plugin-backlink-mount';
-
-const BacklinkButton = ({ cssModuleClass }: { cssModuleClass: string }) => (
-    <div className="d-flex">
-        <button
-            type="button"
-            className={`btn btn-outline-neutral-secondary ${cssModuleClass} rounded-pill py-1 px-lg-3`}
-            onClick={() => console.log('[growi-plugin-backlink]: clicked')}
-        >
-            <span className="grw-icon d-flex me-lg-2">
-                <span className="material-symbols-outlined">link</span>
-            </span>
-            <span className="grw-labels d-none d-lg-flex">バックリンク</span>
-        </button>
-    </div>
-);
 
 const activate = (): void => {
     const pageListBtn = document.querySelector('[data-testid="pageListButton"]');
