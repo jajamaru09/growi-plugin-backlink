@@ -1,14 +1,15 @@
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { useBacklinks } from './useBacklinks';
+import type { BacklinkPage } from './types';
 
 type Props = {
-    pageId: string;
+    pages: BacklinkPage[];
+    loading: boolean;
+    error: string | null;
     onClose: () => void;
 };
 
-const BacklinkModal = ({ pageId, onClose }: Props) => {
-    const { pages, loading, error } = useBacklinks(pageId);
+const BacklinkModal = ({ pages, loading, error, onClose }: Props) => {
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
