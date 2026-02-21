@@ -45,6 +45,13 @@ export function useBacklinks(pageId: string) {
             return;
         }
 
+        // GROWI 内部ルート（/_search, /admin など）はAPIコールをスキップ
+        if (pageId.startsWith('_') || pageId === 'admin' || pageId.startsWith('admin/')) {
+            setPages([]);
+            setLoading(false);
+            return;
+        }
+
         const controller = new AbortController();
 
         async function fetchAll() {
