@@ -24,8 +24,8 @@ const BacklinkButton = ({ cssModuleClass }: Props) => {
                         <span className="material-symbols-outlined">link</span>
                     </span>
                     <span className="grw-labels d-none d-lg-flex">バックリンク</span>
-                    {!loading && pages.length > 0 && (
-                        <span className="badge rounded-pill bg-secondary ms-1">{pages.length}</span>
+                    {!loading && (
+                        <span className="badge rounded-pill bg-neutral-secondary ms-1">{pages.length}</span>
                     )}
                 </button>
             </div>
