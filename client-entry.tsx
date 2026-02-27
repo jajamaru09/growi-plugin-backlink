@@ -44,12 +44,10 @@ const { start, stop } = createPageChangeListener(handlePageChange);
 
 // ─── プラグインライフサイクル ─────────────────────────────────────
 function activate(): void {
-    console.log(`[${PLUGIN_NAME}] activated`);
     start();
 }
 
 function deactivate(): void {
-    console.log(`[${PLUGIN_NAME}] deactivated`);
     stop();
     unmount();
 }
