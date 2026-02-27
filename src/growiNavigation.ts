@@ -85,8 +85,10 @@ export function createPageChangeListener(callback: PageChangeCallback): {
      */
     function onNavigate(e: any): void {
         const dest = new URL(e.destination.url);
-        // pageId URL でなければ（管理画面など）無視する
         const pageId = extractPageId(dest.pathname);
+        // [DEBUG]
+        console.log('[growiNavigation][DEBUG] navigate event fired', { destUrl: dest.href, pageId });
+        // pageId URL でなければ（管理画面など）無視する
         if (!pageId) return;
         // ?revisionId=〈id〉 があれば過去リビジョン、なければ最新版
         const revisionId = dest.searchParams.get('revisionId') ?? undefined;
@@ -99,6 +101,13 @@ export function createPageChangeListener(callback: PageChangeCallback): {
      */
     function start(): void {
         const nav = (window as any).navigation;
+        // [DEBUG]
+        console.log('[growiNavigation][DEBUG] start() called', {
+            navigationApiAvailable: !!nav,
+            alreadyListening: !!nav?._growiPluginListening,
+            currentPathname: location.pathname,
+            currentPageId: extractPageId(location.pathname),
+        });
         // Navigation API 非対応ブラウザ（Firefox など）では何もしない
         if (!nav) return;
         // 複数回 start() を呼ばれても二重登録しないようフラグで管理する
@@ -110,6 +119,8 @@ export function createPageChangeListener(callback: PageChangeCallback): {
         // 現在のURLを参照して初回のコールバックを手動で発火する
         const { pathname, hash } = location;
         const pageId = extractPageId(pathname);
+        // [DEBUG]
+        console.log('[growiNavigation][DEBUG] initial fire check', { pathname, pageId });
         if (pageId) {
             const revisionId = new URL(location.href).searchParams.get('revisionId') ?? undefined;
             tryFire(pageId, hashToMode(hash), revisionId);
