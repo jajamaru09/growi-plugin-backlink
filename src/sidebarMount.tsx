@@ -11,12 +11,6 @@ function getContainer(): Element | null {
     const anchor =
         document.querySelector('[data-testid="pageListButton"]') ??
         document.querySelector('[data-testid="page-comment-button"]');
-    // [DEBUG]
-    console.log('[sidebarMount][DEBUG] getContainer', {
-        pageListButton: document.querySelector('[data-testid="pageListButton"]'),
-        pageCommentButton: document.querySelector('[data-testid="page-comment-button"]'),
-        container: anchor?.parentElement ?? null,
-    });
     return anchor?.parentElement ?? null;
 }
 
@@ -33,32 +27,30 @@ function getCssModuleClass(): string {
 }
 
 /**
+ * マウントポイントと React ルートを取得または新規作成して返す。
+ * マウントポイントが DOM から消えていた場合（サイドバー再レンダリング時）は再生成する。
+ */
+function ensureRoot(container: Element): Root {
+    const existing = document.getElementById(MOUNT_ID);
+    if (existing && document.body.contains(existing) && root) {
+        return root;
+    }
+    root?.unmount();
+    const mountPoint = document.createElement('div');
+    mountPoint.id = MOUNT_ID;
+    container.appendChild(mountPoint);
+    root = createRoot(mountPoint);
+    return root;
+}
+
+/**
  * バックリンクボタンをサイドバーにマウント、または既存ルートを更新する。
- * マウントポイントが消えていた場合（サイドバー再レンダリング時）は再生成する。
  */
 export function mountOrUpdate(pageId: string): void {
-    // [DEBUG]
-    console.log('[sidebarMount][DEBUG] mountOrUpdate called', { pageId });
     const container = getContainer();
-    if (!container) {
-        // [DEBUG]
-        console.warn('[sidebarMount][DEBUG] container not found, aborting mount');
-        return;
-    }
+    if (!container) return;
 
-    let mountPoint = document.getElementById(MOUNT_ID);
-
-    if (!mountPoint || !document.body.contains(mountPoint)) {
-        root?.unmount();
-        root = null;
-
-        mountPoint = document.createElement('div');
-        mountPoint.id = MOUNT_ID;
-        container.appendChild(mountPoint);
-        root = createRoot(mountPoint);
-    }
-
-    root!.render(<BacklinkButton pageId={pageId} cssModuleClass={getCssModuleClass()} />);
+    ensureRoot(container).render(<BacklinkButton pageId={pageId} cssModuleClass={getCssModuleClass()} />);
 }
 
 /** React ルートをアンマウントしてマウントポイントを削除する */

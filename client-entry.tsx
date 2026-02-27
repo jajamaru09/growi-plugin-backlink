@@ -30,9 +30,6 @@ const PLUGIN_NAME = 'growi-plugin-backlink';
  * @param ctx.revisionId - 過去リビジョン表示時のみ存在。undefined なら最新版
  */
 async function handlePageChange(ctx: GrowiPageContext): Promise<void> {
-    // [DEBUG]
-    console.log(`[${PLUGIN_NAME}][DEBUG] handlePageChange fired`, ctx);
-
     if (ctx.mode === 'edit') {
         unmount();
         return;
