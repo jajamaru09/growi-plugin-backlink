@@ -11,6 +11,12 @@ function getContainer(): Element | null {
     const anchor =
         document.querySelector('[data-testid="pageListButton"]') ??
         document.querySelector('[data-testid="page-comment-button"]');
+    // [DEBUG]
+    console.log('[sidebarMount][DEBUG] getContainer', {
+        pageListButton: document.querySelector('[data-testid="pageListButton"]'),
+        pageCommentButton: document.querySelector('[data-testid="page-comment-button"]'),
+        container: anchor?.parentElement ?? null,
+    });
     return anchor?.parentElement ?? null;
 }
 
@@ -31,8 +37,14 @@ function getCssModuleClass(): string {
  * マウントポイントが消えていた場合（サイドバー再レンダリング時）は再生成する。
  */
 export function mountOrUpdate(pageId: string): void {
+    // [DEBUG]
+    console.log('[sidebarMount][DEBUG] mountOrUpdate called', { pageId });
     const container = getContainer();
-    if (!container) return;
+    if (!container) {
+        // [DEBUG]
+        console.warn('[sidebarMount][DEBUG] container not found, aborting mount');
+        return;
+    }
 
     let mountPoint = document.getElementById(MOUNT_ID);
 

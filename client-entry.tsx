@@ -40,8 +40,16 @@ function scheduleCheck(): void {
     debounceTimer = setTimeout(() => {
         debounceTimer = null;
 
+        // [DEBUG]
+        const urlPageId = extractPageId(location.pathname);
+        console.log(`[${PLUGIN_NAME}][DEBUG] scheduleCheck fired`, {
+            pathname: location.pathname,
+            urlPageId,
+            currentPageId,
+        });
+
         // location.pathname からページIDを確認（/admin 等への離脱検知）
-        if (!extractPageId(location.pathname)) {
+        if (!urlPageId) {
             currentPageId = null;
             unmount();
             return;
@@ -65,6 +73,8 @@ function scheduleCheck(): void {
 async function handlePageChange(ctx: GrowiPageContext): Promise<void> {
     // ctx.pageId は "/6995d3fcf17c96c558f6b0ab" 形式 → 先頭の / を除去
     currentPageId = ctx.pageId.slice(1);
+    // [DEBUG]
+    console.log(`[${PLUGIN_NAME}][DEBUG] handlePageChange fired`, ctx);
     scheduleCheck();
 }
 
