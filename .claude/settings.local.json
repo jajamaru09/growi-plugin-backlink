@@ -3,7 +3,8 @@
     "allow": [
       "Bash(gh repo view jajamaru09/growi-plugin-backlink-old --json files)",
       "WebFetch(domain:github.com)",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(curl -s \"https://raw.githubusercontent.com/jajamaru09/growi-plugin-front-matter-viewer/refs/heads/main/src/sidebarMount.ts\")"
     ]
   }
 }

@@ -7,7 +7,6 @@
  */
 
 import { createPageChangeListener } from './src/growiNavigation';
-import { extractPageId } from './src/pageContext';
 import type { GrowiPageContext } from './src/pageContext';
 import { mountOrUpdate, unmount } from './src/sidebarMount';
 
@@ -21,46 +20,6 @@ declare global {
 // ─── 定数 ────────────────────────────────────────────────────────
 const PLUGIN_NAME = 'growi-plugin-backlink';
 
-// ─── モジュールスコープの状態 ─────────────────────────────────────
-// 現在表示中のページの ObjectId。非ページURL（/admin 等）では null
-let currentPageId: string | null = null;
-let observer: MutationObserver | null = null;
-let debounceTimer: ReturnType<typeof setTimeout> | null = null;
-
-// ─── スケジューラー ───────────────────────────────────────────────
-/**
- * 150ms のデバウンスでボタンのマウント状態を確認する。
- * handlePageChange と MutationObserver の両方から呼ばれる。
- *
- * - currentPageId が設定済み → マウント or 更新
- * - 現在の URL が非ページURL → currentPageId をクリアしてアンマウント
- */
-function scheduleCheck(): void {
-    if (debounceTimer != null) clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-        debounceTimer = null;
-
-        // [DEBUG]
-        const urlPageId = extractPageId(location.pathname);
-        console.log(`[${PLUGIN_NAME}][DEBUG] scheduleCheck fired`, {
-            pathname: location.pathname,
-            urlPageId,
-            currentPageId,
-        });
-
-        // location.pathname からページIDを確認（/admin 等への離脱検知）
-        if (!urlPageId) {
-            currentPageId = null;
-            unmount();
-            return;
-        }
-
-        if (currentPageId) {
-            mountOrUpdate(currentPageId);
-        }
-    }, 150);
-}
-
 // ─── ページ遷移ハンドラ ───────────────────────────────────────────
 /**
  * Navigation API がページID形式のURLへの遷移を検知したときに呼ばれる。
@@ -71,46 +30,31 @@ function scheduleCheck(): void {
  * @param ctx.revisionId - 過去リビジョン表示時のみ存在。undefined なら最新版
  */
 async function handlePageChange(ctx: GrowiPageContext): Promise<void> {
-    // ctx.pageId は "/6995d3fcf17c96c558f6b0ab" 形式 → 先頭の / を除去
-    currentPageId = ctx.pageId.slice(1);
     // [DEBUG]
     console.log(`[${PLUGIN_NAME}][DEBUG] handlePageChange fired`, ctx);
-    scheduleCheck();
+
+    if (ctx.mode === 'edit') {
+        unmount();
+        return;
+    }
+
+    // ctx.pageId は "/6995d3fcf17c96c558f6b0ab" 形式 → 先頭の / を除去
+    mountOrUpdate(ctx.pageId.slice(1));
 }
 
 // ─── リスナーの生成 ───────────────────────────────────────────────
 const { start, stop } = createPageChangeListener(handlePageChange);
 
 // ─── プラグインライフサイクル ─────────────────────────────────────
-/**
- * GROWIがプラグインをロードした直後に1回だけ呼ぶ。
- * リスナーを起動してページ遷移の監視を開始する。
- */
 function activate(): void {
     console.log(`[${PLUGIN_NAME}] activated`);
     start();
-
-    // サイドバーの再レンダリング（ページ遷移後の React ツリー差し替えなど）を監視する。
-    // マウントポイントが消えた場合に scheduleCheck() で再マウントする。
-    observer = new MutationObserver(scheduleCheck);
-    observer.observe(document.body, { childList: true, subtree: true });
 }
 
-/**
- * GROWIがプラグインをアンロードするときに呼ぶ。
- * リスナーを停止してリソースをクリーンアップする。
- */
 function deactivate(): void {
     console.log(`[${PLUGIN_NAME}] deactivated`);
     stop();
-    if (debounceTimer != null) {
-        clearTimeout(debounceTimer);
-        debounceTimer = null;
-    }
-    observer?.disconnect();
-    observer = null;
     unmount();
-    currentPageId = null;
 }
 
 // ─── GROWI への自己登録 ───────────────────────────────────────────

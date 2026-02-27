@@ -52,6 +52,8 @@ export function createPageChangeListener(callback: PageChangeCallback): {
 } {
     // 直前に発火したときのキー。同じキーが来たら発火をスキップする。
     let lastKey: string | null = null;
+    // モジュールスコープの登録フラグ（nav オブジェクトへの付与は他プラグインと衝突するため使わない）
+    let isListening = false;
 
     /**
      * コールバックを呼び出す内部関数。
@@ -111,8 +113,8 @@ export function createPageChangeListener(callback: PageChangeCallback): {
         // Navigation API 非対応ブラウザ（Firefox など）では何もしない
         if (!nav) return;
         // 複数回 start() を呼ばれても二重登録しないようフラグで管理する
-        if (nav._growiPluginListening) return;
-        nav._growiPluginListening = true;
+        if (isListening) return;
+        isListening = true;
         nav.addEventListener('navigate', onNavigate);
 
         // navigate イベントは初回ページロード時には発火しないため、
@@ -134,7 +136,7 @@ export function createPageChangeListener(callback: PageChangeCallback): {
     function stop(): void {
         const nav = (window as any).navigation;
         nav?.removeEventListener('navigate', onNavigate);
-        nav && delete nav._growiPluginListening;
+        isListening = false;
         lastKey = null;
     }
 
