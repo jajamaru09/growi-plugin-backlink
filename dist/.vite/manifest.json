@@ -1,0 +1,8 @@
+{
+  "client-entry.tsx": {
+    "file": "assets/client-entry-RRAZ2_6b.js",
+    "name": "client-entry",
+    "src": "client-entry.tsx",
+    "isEntry": true
+  }
+}
